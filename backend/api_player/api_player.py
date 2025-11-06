@@ -3,6 +3,11 @@ from pydantic import BaseModel
 from starlette.middleware.cors import CORSMiddleware
 import requests
 import json
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
+model_api_url=os.getenv("MODEL_API_URL")
 
 app = FastAPI()
 app.add_middleware(
@@ -12,8 +17,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-ollama_url = "http://localhost:11434"
 
 X_MODEL = "llama3.2"
 O_MODEL= "gemma3:1b"
@@ -46,16 +49,13 @@ def play(request: PlayerRequest):
     5. Do NOT write anything before or after the JSON.
     6. Respond with exactly **one JSON object** containing the next move.
     """
-
-    # print("TURN RECEIVED:", turn)
     payload = {
         "model": model,
         "prompt": prompt,
         "stream": False,
     }
     print(prompt)
-    r = requests.post(f"{ollama_url}/api/generate", json=payload)
-
+    r = requests.post(f"{model_api_url}/api/generate", json=payload)
     try:
         response_json = r.json()
         move_text = response_json.get("response", "{}")

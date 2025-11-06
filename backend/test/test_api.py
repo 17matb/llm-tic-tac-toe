@@ -1,5 +1,14 @@
+from fastapi import FastAPI
+from pydantic import BaseModel
+from starlette.middleware.cors import CORSMiddleware
 import requests
+import json
+import requests
+import os
+from dotenv import load_dotenv
 
+load_dotenv()
+model_api_url=os.getenv("MODEL_API_URL")
 
 url = "http://localhost:8000/play"
 board2 = {
@@ -11,20 +20,8 @@ board2 = {
     ],
     "turn": "O"
 }
-
 response = requests.post(url, json=board2)
-
-print(response.json())
-
-from fastapi import FastAPI
-from pydantic import BaseModel
-from starlette.middleware.cors import CORSMiddleware
-import requests
-import json
-
 app = FastAPI()
-
-ollama_url = "http://localhost:11434"
 
 O_MODEL= "gemma3:1b"
 X_MODEL = "llama3.2"
@@ -33,14 +30,9 @@ class PlayerRequest(BaseModel):
     board: dict
     turn: str
 
-def play(board, turn): #PlayerRequest):
-    # board = request.board
-    # turn = request.turn
-    
-
+def play(board, turn): 
     size = len(board)
     model = O_MODEL if turn == "X" else X_MODEL   
-
 
     prompt = f"""
     You are an expert AI agent playing Tic-Tac-Toe on a dynamic {size}x{size} board.
@@ -59,20 +51,13 @@ def play(board, turn): #PlayerRequest):
     6. Respond with exactly **one JSON object** containing the next move.
 
     """
-    # Example of a correct response:
-    # {{"row": 0, "col": 2}}
-
-
     payload = {
         "model": model,
         "prompt": prompt,
         "stream": False,
     }
-    print(prompt)
-    r = requests.post(f"{ollama_url}/api/generate", json=payload)
-
+    r = requests.post(f"{model_api_url}/api/generate", json=payload)
     response_json = r.json()
-    #print(response_json.keys())
     move_text = response_json.get("response", "{}")
     print("RAW MODEL OUTPUT:", move_text)
     move = json.loads(move_text.replace("'", '"'))
@@ -81,7 +66,3 @@ def play(board, turn): #PlayerRequest):
             "model_used": model,
             "move": move
         }
-
-
-
-play(board2["board"], turn="O")
