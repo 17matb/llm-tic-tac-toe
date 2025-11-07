@@ -1,13 +1,14 @@
+import json
+import os
+
+import requests
+from dotenv import load_dotenv
 from fastapi import FastAPI
 from pydantic import BaseModel
 from starlette.middleware.cors import CORSMiddleware
-import requests
-import json
-from dotenv import load_dotenv
-import os
 
 load_dotenv()
-model_api_url=os.getenv("MODEL_API_URL")
+model_api_url = os.getenv("MODEL_API_URL")
 
 app = FastAPI()
 app.add_middleware(
@@ -19,11 +20,13 @@ app.add_middleware(
 )
 
 X_MODEL = "llama3.2"
-O_MODEL= "gemma3:1b"
+O_MODEL = "gemma3:1b"
+
 
 class PlayerRequest(BaseModel):
     board: list[list[str]]
     turn: str
+
 
 @app.post("/play/")
 def play(request: PlayerRequest):
@@ -31,7 +34,7 @@ def play(request: PlayerRequest):
     turn = request.turn
 
     size = len(board)
-    model = O_MODEL if turn == "X" else X_MODEL   
+    model = O_MODEL if turn == "x" else X_MODEL
 
     prompt = f"""
     You are an expert AI agent playing Tic-Tac-Toe on a dynamic {size}x{size} board.
@@ -62,10 +65,8 @@ def play(request: PlayerRequest):
         print("RAW MODEL OUTPUT:", move_text)
         move = json.loads(move_text.replace("'", '"'))
         print(move)
-        print("Raw completion:", response_json.get("response"))   
-        return {
-                "model_used": model,
-                "move": move
-            }
+        print("Raw completion:", response_json.get("response"))
+        return {"model_used": model, "move": move}
     except Exception as e:
         return {"error": "Failed to parse model response", "details": str(e)}
+
