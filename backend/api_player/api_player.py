@@ -1,12 +1,13 @@
+import json
+import logging
+import os
+import re
+
 import requests
 from dotenv import load_dotenv
 from fastapi import FastAPI
 from pydantic import BaseModel
 from starlette.middleware.cors import CORSMiddleware
-import json
-import os
-import logging
-
 
 logging.basicConfig(
     filename="app.log",
@@ -116,7 +117,10 @@ and output ONLY the JSON object.
         move_text = response_json.get("response", "{}")
         print("RAW MODEL OUTPUT:", move_text)
         logs.info(f"Raw model output: {move_text}")
-        move = json.loads(move_text.replace("'", '"'))
+        match = re.search(r"\{[^{}]*\}", move_text)
+        if not match:
+            raise ValueError(f"No JSON object found in response {move_text}")
+        move = json.loads(match.group(0))
         logs.info(f"Parsed move: {move}")
         logs.info("======= END OF TURN =======")
         print(move)
