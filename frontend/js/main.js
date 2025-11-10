@@ -8,7 +8,7 @@ const gameBoardContent = [
   ['', '', ''],
 ];
 
-let currentPlayer = '';
+let currentPlayer = 'x';
 let gameBoardSize = 3;
 
 const isGameOver = () => {
@@ -119,13 +119,23 @@ const isGameOver = () => {
   return null;
 };
 
-const setCurrentPlayer = (newPlayer, modelName) => {
-  // newPlayer: string ('x' or 'o')
-  // modelName: string (provided by api?)
-  currentPlayer = newPlayer;
+const setCurrentPlayerStatus = (modelName) => {
   statusElement.classList.remove('o-playing', 'x-playing');
-  statusElement.classList.add(`${newPlayer}-playing`);
-  statusElement.innerHTML = `C'est au tour de <strong>${modelName}</strong> de jouer avec ${modelName === 'x' ? 'la croix' : 'le cercle'}.`;
+  statusElement.classList.add(`${currentPlayer}-playing`);
+  statusElement.innerHTML = `C'est au tour de <strong>${modelName}</strong> de jouer avec ${currentPlayer === 'x' ? 'la croix' : 'le cercle'}.`;
+};
+
+const toggleCurrentPlayer = (modelName) => {
+  if (currentPlayer === 'x') {
+    currentPlayer = 'o';
+    setCurrentPlayerStatus(modelName);
+    return;
+  }
+  if (currentPlayer === 'o') {
+    currentPlayer = 'x';
+    setCurrentPlayerStatus(modelName);
+    return;
+  }
 };
 
 const showGameBoard = () => {
@@ -142,21 +152,27 @@ const showGameBoard = () => {
   }
 };
 
-const nextTurn = () => {
+const nextTurn = async () => {
   gameBoardElement.classList.remove('hidden');
-  if (!currentPlayer) setCurrentPlayer('x', 'qwen3:14b');
-  if (currentPlayer === 'x') setCurrentPlayer('o', 'phi3:3.8b');
-  if (currentPlayer === 'o') setCurrentPlayer('x', 'qwen3:14b');
-  // fetch(API_URL, {
-  //   method: 'POST',
-  //   body: JSON.stringify(gameBoardContent),
-  //   headers: { 'Content-Type': 'application/json' },
-  // })
-  //   .then((response) => response.json())
-  //   .then((data) => {
-  //     console.log(data);
-  //   });
   showGameBoard();
+
+  const response = await fetch(API_URL, {
+    method: 'POST',
+    body: JSON.stringify({
+      board: gameBoardContent,
+      turn: currentPlayer,
+    }),
+    headers: { 'Content-Type': 'application/json' },
+  });
+
+  const data = await response.json();
+  console.log(data);
+
+  gameBoardContent[data.move.row][data.move.col] = currentPlayer;
+  fetchedData = data;
+
+  showGameBoard();
+  toggleCurrentPlayer(data.model_used);
 };
 
 startButtonElement.addEventListener('click', () => {
