@@ -1,14 +1,9 @@
-import json
-import os
-
 import requests
 from dotenv import load_dotenv
 from fastapi import FastAPI
 from pydantic import BaseModel
 from starlette.middleware.cors import CORSMiddleware
-import requests
 import json
-from dotenv import load_dotenv
 import os
 import logging
 
