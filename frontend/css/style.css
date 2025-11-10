@@ -39,6 +39,11 @@ body {
   aspect-ratio: 1/1;
 }
 
+.game-board.ten-by-ten {
+  grid-template-columns: repeat(10, 1fr);
+  grid-template-rows: repeat(10, 1fr);
+}
+
 .cell {
   background: var(--board-bg);
   display: flex;
@@ -150,6 +155,7 @@ button:active {
   transform: translate(-50%, -50%);
 }
 
-.hidden {
-  display: none;
+.header-buttons {
+  display: flex;
+  gap: 1rem;
 }
