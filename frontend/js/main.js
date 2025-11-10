@@ -1,18 +1,18 @@
 const gameBoardElement = document.querySelector('.game-board');
 const startButtonElement = document.querySelector('.start-button');
 const statusElement = document.querySelector('.status');
+const boardSizeButton = document.querySelector('.board-size-button');
 
-const gameBoardContent = [
+let gameBoardContent = [
   ['', '', ''],
   ['', '', ''],
   ['', '', ''],
 ];
 
 let currentPlayer = 'x';
-let gameBoardSize = 3;
 
 const isGameOver = () => {
-  const nbOfCellsToWin = gameBoardSize === 10 ? 5 : 3;
+  const nbOfCellsToWin = gameBoardContent.length === 10 ? 5 : 3;
   let winner = '';
 
   // horizontal
@@ -152,29 +152,74 @@ const showGameBoard = () => {
   }
 };
 
-const nextTurn = async () => {
-  gameBoardElement.classList.remove('hidden');
+const toggleGameBoardSize = () => {
+  if (gameBoardContent.length === 3) {
+    gameBoardContent = [
+      ['', '', '', '', '', '', '', '', '', ''],
+      ['', '', '', '', '', '', '', '', '', ''],
+      ['', '', '', '', '', '', '', '', '', ''],
+      ['', '', '', '', '', '', '', '', '', ''],
+      ['', '', '', '', '', '', '', '', '', ''],
+      ['', '', '', '', '', '', '', '', '', ''],
+      ['', '', '', '', '', '', '', '', '', ''],
+      ['', '', '', '', '', '', '', '', '', ''],
+      ['', '', '', '', '', '', '', '', '', ''],
+      ['', '', '', '', '', '', '', '', '', ''],
+    ];
+    gameBoardElement.classList.add('ten-by-ten');
+    boardSizeButton.innerHTML = 'Jouer en 3x3';
+  } else {
+    gameBoardContent = [
+      ['', '', ''],
+      ['', '', ''],
+      ['', '', ''],
+    ];
+    gameBoardElement.classList.remove('ten-by-ten');
+    boardSizeButton.innerHTML = 'Jouer en 10x10';
+  }
   showGameBoard();
-
-  const response = await fetch(API_URL, {
-    method: 'POST',
-    body: JSON.stringify({
-      board: gameBoardContent,
-      turn: currentPlayer,
-    }),
-    headers: { 'Content-Type': 'application/json' },
-  });
-
-  const data = await response.json();
-  console.log(data);
-
-  gameBoardContent[data.move.row][data.move.col] = currentPlayer;
-  fetchedData = data;
-
-  showGameBoard();
-  toggleCurrentPlayer(data.model_used);
 };
 
-startButtonElement.addEventListener('click', () => {
+const nextTurn = async () => {
+  showGameBoard();
+
+  try {
+    const response = await fetch(API_URL, {
+      method: 'POST',
+      body: JSON.stringify({
+        board: gameBoardContent,
+        turn: currentPlayer,
+      }),
+      headers: { 'Content-Type': 'application/json' },
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error ${response.status}`);
+    }
+
+    const data = await response.json();
+    console.log(data);
+
+    gameBoardContent[data.move.row][data.move.col] = currentPlayer;
+    fetchedData = data;
+
+    showGameBoard();
+    toggleCurrentPlayer(data.model_used);
+  } catch (error) {
+    console.error('api call failed', error);
+  }
+};
+
+boardSizeButton.addEventListener('click', (e) => {
+  e.preventDefault();
+  toggleGameBoardSize();
+});
+
+startButtonElement.addEventListener('click', (e) => {
+  e.preventDefault();
   nextTurn();
+});
+
+window.addEventListener('load', () => {
+  showGameBoard();
 });
