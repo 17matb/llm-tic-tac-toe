@@ -1,3 +1,8 @@
+import json
+import os
+
+import requests
+from dotenv import load_dotenv
 from fastapi import FastAPI
 from pydantic import BaseModel
 from starlette.middleware.cors import CORSMiddleware
@@ -43,7 +48,7 @@ def play(request: PlayerRequest):
     board = request.board
     turn = request.turn
     size = len(board)
-    model = O_MODEL if turn == "X" else X_MODEL
+    model = O_MODEL if turn == "x" else X_MODEL
     logs.info(f"Board state: {board}")
     logs.info(f"Player Turn: {turn}")
     logs.info(f"Model Name: {model}")
