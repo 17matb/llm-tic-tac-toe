@@ -191,6 +191,7 @@ const nextTurn = async () => {
     }),
     headers: { 'Content-Type': 'application/json' },
   });
+  console.log(response);
 
   const data = await response.json();
   console.log(data);
@@ -202,11 +203,13 @@ const nextTurn = async () => {
   toggleCurrentPlayer(data.model_used);
 };
 
-boardSizeButton.addEventListener('click', () => {
+boardSizeButton.addEventListener('click', (e) => {
+  e.preventDefault();
   toggleGameBoardSize();
 });
 
-startButtonElement.addEventListener('click', () => {
+startButtonElement.addEventListener('click', (e) => {
+  e.preventDefault();
   nextTurn();
 });
 
