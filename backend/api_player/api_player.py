@@ -10,7 +10,7 @@ from pydantic import BaseModel
 from starlette.middleware.cors import CORSMiddleware
 
 logging.basicConfig(
-    filename="app.log",
+    # filename="app.log",
     level=logging.INFO,
     format="%(asctime)s - %(levelname)s - %(message)s",
 )
@@ -39,7 +39,7 @@ class PlayerRequest(BaseModel):
     turn: str
 
 
-@app.post("/play/")
+@app.post("/play")
 def play(request: PlayerRequest):
     board = request.board
     turn = request.turn
@@ -115,7 +115,6 @@ and output ONLY the JSON object.
     try:
         response_json = r.json()
         move_text = response_json.get("response", "{}")
-        print("RAW MODEL OUTPUT:", move_text)
         logs.info(f"Raw model output: {move_text}")
         match = re.search(r"\{[^{}]*\}", move_text)
         if not match:
@@ -123,8 +122,6 @@ and output ONLY the JSON object.
         move = json.loads(match.group(0))
         logs.info(f"Parsed move: {move}")
         logs.info("======= END OF TURN =======")
-        print(move)
-        print("Raw completion:", response_json.get("response"))
         return {"model_used": model, "move": move}
     except Exception as e:
         logs.error(f"Failed to parse model response: {str(e)}")

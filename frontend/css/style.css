@@ -84,6 +84,19 @@ body {
   transform: translate(-50%, -50%);
 }
 
+.ten-by-ten > .cell.x-value::before,
+.ten-by-ten > .cell.x-value::after {
+  width: 60%;
+  height: 0.35rem;
+  border-radius: 0.1rem;
+}
+
+.ten-by-ten > .cell.o-value::before {
+  width: 60%;
+  height: 60%;
+  box-shadow: inset 0 0 0 0.35rem var(--board-secondary);
+}
+
 header {
   display: flex;
   justify-content: space-between;

@@ -183,24 +183,31 @@ const toggleGameBoardSize = () => {
 const nextTurn = async () => {
   showGameBoard();
 
-  const response = await fetch(API_URL, {
-    method: 'POST',
-    body: JSON.stringify({
-      board: gameBoardContent,
-      turn: currentPlayer,
-    }),
-    headers: { 'Content-Type': 'application/json' },
-  });
-  console.log(response);
+  try {
+    const response = await fetch(API_URL, {
+      method: 'POST',
+      body: JSON.stringify({
+        board: gameBoardContent,
+        turn: currentPlayer,
+      }),
+      headers: { 'Content-Type': 'application/json' },
+    });
 
-  const data = await response.json();
-  console.log(data);
+    if (!response.ok) {
+      throw new Error(`HTTP error ${response.status}`);
+    }
 
-  gameBoardContent[data.move.row][data.move.col] = currentPlayer;
-  fetchedData = data;
+    const data = await response.json();
+    console.log(data);
 
-  showGameBoard();
-  toggleCurrentPlayer(data.model_used);
+    gameBoardContent[data.move.row][data.move.col] = currentPlayer;
+    fetchedData = data;
+
+    showGameBoard();
+    toggleCurrentPlayer(data.model_used);
+  } catch (error) {
+    console.error('api call failed', error);
+  }
 };
 
 boardSizeButton.addEventListener('click', (e) => {
