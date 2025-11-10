@@ -1,0 +1,23 @@
+2025-11-10 09:59:11,675 - INFO - API is starting up..
+2025-11-10 09:59:11,736 - INFO - Started server process [79977]
+2025-11-10 09:59:11,736 - INFO - Waiting for application startup.
+2025-11-10 09:59:11,736 - INFO - Application startup complete.
+2025-11-10 09:59:11,737 - INFO - Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
+2025-11-10 09:59:21,765 - INFO - Board state: [['string']]
+2025-11-10 09:59:21,765 - INFO - Player Turn: string
+2025-11-10 09:59:21,765 - INFO - Model Name: llama3.2
+2025-11-10 09:59:21,765 - INFO - Grid size: 1
+2025-11-10 09:59:22,049 - INFO - Raw model output: {"row": 0, "col": 1}
+2025-11-10 09:59:22,050 - INFO - Parsed move: {'row': 0, 'col': 1}
+2025-11-10 09:59:22,050 - INFO - ======= END OF TURN =======
+2025-11-10 09:59:23,962 - INFO - Board state: [['string']]
+2025-11-10 09:59:23,962 - INFO - Player Turn: string
+2025-11-10 09:59:23,962 - INFO - Model Name: llama3.2
+2025-11-10 09:59:23,962 - INFO - Grid size: 1
+2025-11-10 09:59:24,234 - INFO - Raw model output: {"row": 0, "col": 1}
+2025-11-10 09:59:24,234 - INFO - Parsed move: {'row': 0, 'col': 1}
+2025-11-10 09:59:24,234 - INFO - ======= END OF TURN =======
+2025-11-10 09:59:46,186 - INFO - Shutting down
+2025-11-10 09:59:46,289 - INFO - Waiting for application shutdown.
+2025-11-10 09:59:46,291 - INFO - Application shutdown complete.
+2025-11-10 09:59:46,291 - INFO - Finished server process [79977]
