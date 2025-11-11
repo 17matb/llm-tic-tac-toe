@@ -10,10 +10,47 @@ let gameBoardContent = [
 ];
 
 let currentPlayer = 'x';
+let winner = '';
+
+const resetGameBoard = () => {
+  if (gameBoardContent.length === 3) {
+    gameBoardContent = [
+      ['', '', ''],
+      ['', '', ''],
+      ['', '', ''],
+    ];
+  } else {
+    gameBoardContent = [
+      ['', '', '', '', '', '', '', '', '', ''],
+      ['', '', '', '', '', '', '', '', '', ''],
+      ['', '', '', '', '', '', '', '', '', ''],
+      ['', '', '', '', '', '', '', '', '', ''],
+      ['', '', '', '', '', '', '', '', '', ''],
+      ['', '', '', '', '', '', '', '', '', ''],
+      ['', '', '', '', '', '', '', '', '', ''],
+      ['', '', '', '', '', '', '', '', '', ''],
+      ['', '', '', '', '', '', '', '', '', ''],
+      ['', '', '', '', '', '', '', '', '', ''],
+    ];
+  }
+  currentPlayer = 'x';
+  winner = '';
+};
+
+const getAvailableCells = () => {
+  let availableCells = [];
+  for (let row = 0; row < gameBoardContent.length; row++) {
+    for (let col = 0; col < gameBoardContent[row].length; col++) {
+      if (!gameBoardContent[row][col]) {
+        availableCells.push({ row: row, col: col });
+      }
+    }
+  }
+  return availableCells;
+};
 
 const isGameOver = () => {
   const nbOfCellsToWin = gameBoardContent.length === 10 ? 5 : 3;
-  let winner = '';
 
   // horizontal
   for (let row = 0; row < gameBoardContent.length; row++) {
@@ -115,14 +152,16 @@ const isGameOver = () => {
     }
   }
 
-  if (winner) return winner;
+  if (winner) {
+    return winner;
+  }
   return null;
 };
 
 const setCurrentPlayerStatus = (modelName) => {
   statusElement.classList.remove('o-playing', 'x-playing');
   statusElement.classList.add(`${currentPlayer}-playing`);
-  statusElement.innerHTML = `C'est au tour de <strong>${modelName}</strong> de jouer avec ${currentPlayer === 'x' ? 'la croix' : 'le cercle'}.`;
+  statusElement.innerHTML = `<strong>${modelName}</strong> vient de jouer, c'est maintenant au tour ${currentPlayer === 'x' ? 'de la <span>croix</span>' : 'du <span>cercle</span>'}.`;
 };
 
 const toggleCurrentPlayer = (modelName) => {
@@ -189,6 +228,7 @@ const nextTurn = async () => {
       body: JSON.stringify({
         board: gameBoardContent,
         turn: currentPlayer,
+        available_cells: getAvailableCells(),
       }),
       headers: { 'Content-Type': 'application/json' },
     });
@@ -204,7 +244,14 @@ const nextTurn = async () => {
     fetchedData = data;
 
     showGameBoard();
-    toggleCurrentPlayer(data.model_used);
+    isGameOver();
+    if (!winner) {
+      startButtonElement.innerHTML = 'Tour suivant';
+      toggleCurrentPlayer(data.model_used);
+    } else {
+      startButtonElement.innerHTML = 'Nouvelle partie';
+      statusElement.innerHTML = `Le modèle gagnant est : <strong>${data.model_used}</strong> avec ${currentPlayer === 'x' ? '<span>la croix</span>' : '<span>le cercle</span>'}`;
+    }
   } catch (error) {
     console.error('api call failed', error);
   }
@@ -217,6 +264,9 @@ boardSizeButton.addEventListener('click', (e) => {
 
 startButtonElement.addEventListener('click', (e) => {
   e.preventDefault();
+  if (winner) {
+    resetGameBoard();
+  }
   nextTurn();
 });
 
