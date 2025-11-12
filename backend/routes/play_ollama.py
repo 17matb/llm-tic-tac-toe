@@ -1,35 +1,20 @@
 import json
-import logging
 import os
 import re
-
 import requests
+from logs.logger import logs
 from dotenv import load_dotenv
-from fastapi import FastAPI
+from fastapi import APIRouter
 from pydantic import BaseModel
-from starlette.middleware.cors import CORSMiddleware
-
-logging.basicConfig(
-    # filename="app.log",
-    level=logging.INFO,
-    format="%(asctime)s - %(levelname)s - %(message)s",
-)
-logs = logging.getLogger(__name__)
-logs.info("API is starting up..")
+from json import JSONDecodeError
+from requests.exceptions import RequestException, HTTPError, Timeout, ConnectionError
 
 
 load_dotenv()
-model_api_url = os.getenv("MODEL_API_URL")
+model_ollama_api_url = os.getenv("MODEL_OLLAMA_API_URL")
 
-app = FastAPI()
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+router = APIRouter()
 X_MODEL = "llama3.2"
 O_MODEL = "gemma3:1b"
 
@@ -40,13 +25,13 @@ class PlayerRequest(BaseModel):
     available_cells: list[dict]
 
 
-@app.post("/play")
-def play(request: PlayerRequest):
+@router.post("/play-ollama")
+def play_ollama(request: PlayerRequest):
     board = request.board
-    turn = request.turn
     available_cells = request.available_cells
+    turn = request.turn
     size = len(board)
-    model = X_MODEL if turn == "x" else O_MODEL
+    model = O_MODEL if turn == "x" else X_MODEL
     logs.info(f"Board state: {board}")
     logs.info(f"Player Turn: {turn}")
     logs.info(f"Model Name: {model}")
@@ -86,6 +71,7 @@ You must follow this strategic hierarchy:
 
 7. **Avoid losing moves**  
     - You must verify that your chosen move does NOT allow the opponent to win immediately on their next turn.
+
 -------------------------------------
 OUTPUT RULES (STRICT)
 -------------------------------------
@@ -95,7 +81,6 @@ OUTPUT RULES (STRICT)
 2. <row_index> and <col_index> must be integers between 0 and {size - 1}.
 
 3. The chosen cell MUST be empty. Here is a list of empty cells : {available_cells}. You WILL NOT choose any cell that is not in the provided list.
-
 4. Do NOT output any explanations, reasoning, comments, markdown, text, quotes, or backticks.
     ONLY output the JSON object.
 
@@ -112,7 +97,7 @@ and output ONLY the JSON object.
         "prompt": prompt,
         "stream": False,
     }
-    r = requests.post(f"{model_api_url}/api/generate", json=payload)
+    r = requests.post(f"{model_ollama_api_url}/api/generate", json=payload)
     try:
         response_json = r.json()
         move_text = response_json.get("response", "{}")
@@ -124,6 +109,22 @@ and output ONLY the JSON object.
         logs.info(f"Parsed move: {move}")
         logs.info("======= END OF TURN =======")
         return {"model_used": model, "move": move}
+    # Handle network or request-related errors
+    except (HTTPError, Timeout, ConnectionError, RequestException) as e:
+        logs.error(f"API request error: {str(e)}")
+        return {"error": "API request failed", "details": str(e)}
+
+    # Handle JSON decoding errors
+    except JSONDecodeError as e:
+        logs.error(f"JSON parsing error: {str(e)}")
+        return {"error": "Failed to parse JSON", "details": str(e)}
+
+    # Handle logical errors or missing fields
+    except (ValueError, KeyError) as e:
+        logs.error(f"Logical error or missing fields: {str(e)}")
+        return {"error": "Invalid move data", "details": str(e)}
+
+    # Catch-all for any unexpected errors
     except Exception as e:
-        logs.error(f"Failed to parse model response: {str(e)}")
-        return {"error": "Failed to parse model response", "details": str(e)}
+        logs.error(f"Unexpected error: {str(e)}")
+        return {"error": "Unexpected error", "details": str(e)}
