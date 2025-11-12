@@ -65,10 +65,9 @@ Now choose the best legal move and output ONLY the JSON object.
     try:
         response = client_model.chat.completions.create(
             messages=[{"role": "user", "content": prompt}],
-            max_completion_tokens=700,
+            max_completion_tokens=2000,
             model=deployment_model,
         )
-
         content = response.choices[0].message.content
         logs.info(f"[{deployment_model}] RAW MODEL CONTENT: {content!r}")
 
