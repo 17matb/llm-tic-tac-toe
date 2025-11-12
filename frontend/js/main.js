@@ -11,6 +11,7 @@ let gameBoardContent = [
 
 let currentPlayer = 'x';
 let winner = '';
+let isBoardFull = false;
 
 const resetGameBoard = () => {
   if (gameBoardContent.length === 3) {
@@ -50,6 +51,18 @@ const getAvailableCells = () => {
 };
 
 const isGameOver = () => {
+  let isFull = true;
+  for (let row = 0; row < gameBoardContent.length; row++) {
+    for (let col = 0; col < gameBoardContent[row].length; col++) {
+      if (!gameBoardContent[row][col]) {
+        isFull = false;
+      }
+    }
+  }
+  isBoardFull = isFull;
+};
+
+const isWinnerFound = () => {
   const nbOfCellsToWin = gameBoardContent.length === 10 ? 5 : 3;
 
   // horizontal
@@ -158,21 +171,21 @@ const isGameOver = () => {
   return null;
 };
 
-const setCurrentPlayerStatus = (modelName) => {
+const setCurrentPlayerStatus = (modelName, duration) => {
   statusElement.classList.remove('o-playing', 'x-playing');
   statusElement.classList.add(`${currentPlayer}-playing`);
-  statusElement.innerHTML = `<strong>${modelName}</strong> vient de jouer, c'est maintenant au tour ${currentPlayer === 'x' ? 'de la <span>croix</span>' : 'du <span>cercle</span>'}.`;
+  statusElement.innerHTML = `<strong>${modelName}</strong> vient de jouer en ${duration} seconde(s), c'est maintenant au tour ${currentPlayer === 'x' ? 'de la <span>croix</span>' : 'du <span>cercle</span>'}.`;
 };
 
-const toggleCurrentPlayer = (modelName) => {
+const toggleCurrentPlayer = (modelName, duration) => {
   if (currentPlayer === 'x') {
     currentPlayer = 'o';
-    setCurrentPlayerStatus(modelName);
+    setCurrentPlayerStatus(modelName, duration);
     return;
   }
   if (currentPlayer === 'o') {
     currentPlayer = 'x';
-    setCurrentPlayerStatus(modelName);
+    setCurrentPlayerStatus(modelName, duration);
     return;
   }
 };
@@ -221,6 +234,7 @@ const toggleGameBoardSize = () => {
 
 const nextTurn = async () => {
   showGameBoard();
+  startTime = new Date();
 
   try {
     const response = await fetch(API_URL, {
@@ -244,13 +258,21 @@ const nextTurn = async () => {
     fetchedData = data;
 
     showGameBoard();
+    isWinnerFound();
     isGameOver();
-    if (!winner) {
+    endTime = new Date();
+    turnDuration = (endTime - startTime) / 1000;
+
+    if (!winner && !isBoardFull) {
       startButtonElement.innerHTML = 'Tour suivant';
-      toggleCurrentPlayer(data.model_used);
+      toggleCurrentPlayer(data.model_used, turnDuration);
     } else {
       startButtonElement.innerHTML = 'Nouvelle partie';
-      statusElement.innerHTML = `Le modèle gagnant est : <strong>${data.model_used}</strong> avec ${currentPlayer === 'x' ? '<span>la croix</span>' : '<span>le cercle</span>'}`;
+      if (winner) {
+        statusElement.innerHTML = `Le modèle gagnant est : <strong>${data.model_used}</strong> avec ${currentPlayer === 'x' ? '<span>la croix</span>' : '<span>le cercle</span>'} après un dernier tour ayant duré ${turnDuration} seconde(s).`;
+      } else {
+        statusElement.innerHTML = `La partie s'est terminée par une <strong>égalité</strong> après un dernier tour ayant duré ${turnDuration} seconde(s).`;
+      }
     }
   } catch (error) {
     console.error('api call failed', error);
