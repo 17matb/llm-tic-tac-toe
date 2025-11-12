@@ -171,4 +171,9 @@ button:active {
 .header-buttons {
   display: flex;
   gap: 1rem;
+  align-items: center;
+}
+
+.model-provider {
+  border: none;
 }

@@ -2,6 +2,13 @@ const gameBoardElement = document.querySelector('.game-board');
 const startButtonElement = document.querySelector('.start-button');
 const statusElement = document.querySelector('.status');
 const boardSizeButton = document.querySelector('.board-size-button');
+const modelProviderSelect = document.querySelector('.model-provider');
+
+let API_URL = OLLAMA_API_URL;
+
+modelProviderSelect.addEventListener('change', (e) => {
+  API_URL = e.target.value === 'ollama' ? OLLAMA_API_URL : AZURE_API_URL;
+});
 
 let gameBoardContent = [
   ['', '', ''],
@@ -237,7 +244,7 @@ const nextTurn = async () => {
   startTime = new Date();
 
   try {
-    const response = await fetch(AZURE_API_URL, {
+    const response = await fetch(API_URL, {
       method: 'POST',
       body: JSON.stringify({
         board: gameBoardContent,
