@@ -237,7 +237,7 @@ const nextTurn = async () => {
   startTime = new Date();
 
   try {
-    const response = await fetch(API_URL, {
+    const response = await fetch(AZURE_API_URL, {
       method: 'POST',
       body: JSON.stringify({
         board: gameBoardContent,
