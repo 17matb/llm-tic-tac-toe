@@ -10,8 +10,8 @@ from json import JSONDecodeError
 router = APIRouter()
 
 
-@router.post("/play-llm-vs-llm")
-def play_llm_vs_llm(request: PlayerRequest):
+@router.post("/play-azure")
+def play_azure(request: PlayerRequest):
     board = request.board
     available_cells = request.available_cells
     turn = request.turn

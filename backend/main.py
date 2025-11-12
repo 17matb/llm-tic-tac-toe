@@ -21,6 +21,6 @@ def home():
     return {"message": "Hello, FastAPI!"}
 
 
-app.include_router(ollama_router, prefix="/ollama", tags=["Ollama"])
-app.include_router(llm_router, prefix="/azure-llm", tags=["Azure LLM"])
+app.include_router(ollama_router)
+app.include_router(llm_router)
 logs.info(" Loaded both Ollama and Azure LLM routes.")
