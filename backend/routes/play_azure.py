@@ -2,31 +2,29 @@ import json
 import re
 from fastapi import APIRouter
 from utils.azure_client import client, deployment, client_gpt4, deployment_gpt4
-from routes.play_ollama import PlayerRequest
 from logs.logger import logs
 from json import JSONDecodeError
-
+from utils.models import PlayerRequest
+from utils.game_handler import game_handler
 
 router = APIRouter()
 
 
 @router.post("/play-azure")
 def play_azure(request: PlayerRequest):
-    board = request.board
-    available_cells = request.available_cells
-    turn = request.turn
-    size = len(board)
-    logs.info(f"Board state: {board}")
-    logs.info(f"Player Turn: {turn}")
-    logs.info(f"Grid size: {size}")
-
-    if turn.lower() == "x":
+    if request.turn.lower() == "x":
         client_model = client  # O4-mini
         deployment_model = deployment
     else:
         client_model = client_gpt4  # GPT-4
         deployment_model = deployment_gpt4
-
+    data = game_handler(
+        request.board, request.available_cells, request.turn, model=deployment_model
+    )
+    board = data["board"]
+    available_cells = data["available_cells"]
+    turn = data["turn"]
+    size = len(board)
     prompt = f"""
 You are an expert AI agent playing Tic-Tac-Toe on a dynamic {size}x{size} board.
 
