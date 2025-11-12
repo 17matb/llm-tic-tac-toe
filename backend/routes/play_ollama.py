@@ -5,10 +5,10 @@ import requests
 from logs.logger import logs
 from dotenv import load_dotenv
 from fastapi import APIRouter
-from pydantic import BaseModel
 from json import JSONDecodeError
 from requests.exceptions import RequestException, HTTPError, Timeout, ConnectionError
-
+from utils.models import PlayerRequest
+from utils.game_handler import game_handler
 
 load_dotenv()
 model_ollama_api_url = os.getenv("MODEL_OLLAMA_API_URL")
@@ -19,23 +19,14 @@ X_MODEL = "llama3.2"
 O_MODEL = "gemma3:1b"
 
 
-class PlayerRequest(BaseModel):
-    board: list[list[str]]
-    turn: str
-    available_cells: list[dict]
-
-
 @router.post("/play-ollama")
 def play_ollama(request: PlayerRequest):
-    board = request.board
-    available_cells = request.available_cells
-    turn = request.turn
+    model = X_MODEL if request.turn == "x" else O_MODEL
+    data = game_handler(request.board, request.available_cells, request.turn, model)
+    board = data["board"]
+    available_cells = data["available_cells"]
+    turn = data["turn"]
     size = len(board)
-    model = O_MODEL if turn == "x" else X_MODEL
-    logs.info(f"Board state: {board}")
-    logs.info(f"Player Turn: {turn}")
-    logs.info(f"Model Name: {model}")
-    logs.info(f"Grid size: {size}")
     prompt = f"""
 You are an expert AI agent playing Tic-Tac-Toe on a dynamic {size}x{size} board.
 
