@@ -129,38 +129,38 @@ button:active {
   transition: 0.1s;
 }
 
-.status.x-playing p,
-.status.o-playing p {
+.status.x-playing span,
+.status.o-playing span {
   position: relative;
   padding-left: 1.5rem;
   color: var(--text-color, #222);
 }
 
-.status.x-playing p::before,
-.status.x-playing p::after {
+.status.x-playing span::before,
+.status.x-playing span::after {
   content: '';
   position: absolute;
   top: 50%;
-  left: 0.5rem;
+  left: 0.7rem;
   width: 1.2rem;
   height: 0.3rem;
   background: var(--board-primary);
   border-radius: 0.08rem;
 }
 
-.status.x-playing p::before {
+.status.x-playing span::before {
   transform: translate(-50%, -50%) rotate(45deg);
 }
 
-.status.x-playing p::after {
+.status.x-playing span::after {
   transform: translate(-50%, -50%) rotate(-45deg);
 }
 
-.status.o-playing p::before {
+.status.o-playing span::before {
   content: '';
   position: absolute;
   top: 50%;
-  left: 0.5rem;
+  left: 0.7rem;
   width: 1.2rem;
   height: 1.2rem;
   box-shadow: inset 0 0 0 0.3rem var(--board-secondary);

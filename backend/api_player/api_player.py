@@ -37,14 +37,16 @@ O_MODEL = "gemma3:1b"
 class PlayerRequest(BaseModel):
     board: list[list[str]]
     turn: str
+    available_cells: list[dict]
 
 
 @app.post("/play")
 def play(request: PlayerRequest):
     board = request.board
     turn = request.turn
+    available_cells = request.available_cells
     size = len(board)
-    model = O_MODEL if turn == "x" else X_MODEL
+    model = X_MODEL if turn == "x" else O_MODEL
     logs.info(f"Board state: {board}")
     logs.info(f"Player Turn: {turn}")
     logs.info(f"Model Name: {model}")
@@ -84,7 +86,6 @@ You must follow this strategic hierarchy:
 
 7. **Avoid losing moves**  
     - You must verify that your chosen move does NOT allow the opponent to win immediately on their next turn.
-
 -------------------------------------
 OUTPUT RULES (STRICT)
 -------------------------------------
@@ -93,7 +94,7 @@ OUTPUT RULES (STRICT)
 
 2. <row_index> and <col_index> must be integers between 0 and {size - 1}.
 
-3. The chosen cell MUST be empty.
+3. The chosen cell MUST be empty. Here is a list of empty cells : {available_cells}. You WILL NOT choose any cell that is not in the provided list.
 
 4. Do NOT output any explanations, reasoning, comments, markdown, text, quotes, or backticks.
     ONLY output the JSON object.
